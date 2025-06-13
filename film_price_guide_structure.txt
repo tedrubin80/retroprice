@@ -1,0 +1,194 @@
+film-price-guide/
+│
+├── README.md                          # Project documentation
+├── .gitignore                         # Git ignore file
+├── .env.example                       # Example environment variables
+├── requirements.txt                   # Python dependencies
+├── package.json                       # Node.js dependencies (if using build tools)
+├── docker-compose.yml                 # Docker setup (optional)
+│
+├── frontend/                          # Frontend application
+│   ├── index.html                     # Homepage
+│   ├── search-results.html            # Search results page
+│   ├── item-detail.html               # Item detail page
+│   ├── dashboard.html                 # User dashboard/watchlist
+│   ├── admin-config.html              # Backend configuration panel
+│   │
+│   ├── css/                           # Stylesheets
+│   │   ├── main.css                   # Main styles
+│   │   ├── components.css             # Reusable components
+│   │   └── responsive.css             # Mobile responsive styles
+│   │
+│   ├── js/                            # JavaScript files
+│   │   ├── main.js                    # Main application logic
+│   │   ├── search.js                  # Search functionality
+│   │   ├── dashboard.js               # Dashboard interactions
+│   │   ├── charts.js                  # Price chart components
+│   │   └── api.js                     # API communication
+│   │
+│   ├── assets/                        # Static assets
+│   │   ├── images/                    # Images and icons
+│   │   │   ├── logo.png
+│   │   │   ├── placeholder-vhs.png
+│   │   │   └── placeholder-dvd.png
+│   │   ├── fonts/                     # Custom fonts
+│   │   └── icons/                     # Icon files
+│   │
+│   └── dist/                          # Built/compiled frontend (if using build tools)
+│       ├── css/
+│       ├── js/
+│       └── assets/
+│
+├── backend/                           # Backend application
+│   ├── app.py                         # Main Flask application
+│   ├── config.py                      # Configuration settings
+│   ├── wsgi.py                        # WSGI entry point for production
+│   │
+│   ├── api/                           # API endpoints
+│   │   ├── __init__.py
+│   │   ├── search.py                  # Search endpoints
+│   │   ├── items.py                   # Item detail endpoints
+│   │   ├── watchlist.py               # Watchlist endpoints
+│   │   ├── auth.py                    # Authentication endpoints
+│   │   └── admin.py                   # Admin configuration endpoints
+│   │
+│   ├── models/                        # Database models
+│   │   ├── __init__.py
+│   │   ├── item.py                    # Item model
+│   │   ├── price_history.py           # Price history model
+│   │   ├── user.py                    # User model
+│   │   ├── watchlist.py               # Watchlist model
+│   │   └── alert.py                   # Price alert model
+│   │
+│   ├── services/                      # Business logic
+│   │   ├── __init__.py
+│   │   ├── ebay_service.py            # eBay API integration
+│   │   ├── heritage_service.py        # Heritage Auctions scraping
+│   │   ├── price_processor.py         # Price data processing
+│   │   ├── alert_service.py           # Price alert system
+│   │   ├── email_service.py           # Email notifications
+│   │   └── scheduler.py               # Background job scheduler
+│   │
+│   ├── utils/                         # Utility functions
+│   │   ├── __init__.py
+│   │   ├── database.py                # Database utilities
+│   │   ├── validators.py              # Input validation
+│   │   ├── helpers.py                 # General helper functions
+│   │   ├── encryption.py              # Credential encryption
+│   │   └── rate_limiter.py            # API rate limiting
+│   │
+│   ├── migrations/                    # Database migrations
+│   │   ├── 001_initial_schema.sql
+│   │   ├── 002_add_rarity_scoring.sql
+│   │   └── 003_add_user_preferences.sql
+│   │
+│   └── tests/                         # Backend tests
+│       ├── __init__.py
+│       ├── test_api.py
+│       ├── test_models.py
+│       ├── test_services.py
+│       └── fixtures/
+│           └── sample_data.json
+│
+├── data/                              # Data storage
+│   ├── database/                      # Database files
+│   │   ├── film_price_guide.db        # SQLite database (if using SQLite)
+│   │   └── backups/                   # Database backups
+│   │       ├── backup_2025_06_01.db
+│   │       └── backup_2025_05_31.db
+│   │
+│   ├── cache/                         # Cache files
+│   │   ├── ebay_responses/
+│   │   └── heritage_responses/
+│   │
+│   ├── logs/                          # Application logs
+│   │   ├── app.log
+│   │   ├── error.log
+│   │   ├── api.log
+│   │   └── scheduler.log
+│   │
+│   └── exports/                       # Data exports
+│       ├── user_data_exports/
+│       └── price_reports/
+│
+├── scripts/                           # Utility scripts
+│   ├── setup.py                       # Initial setup script
+│   ├── migrate_database.py            # Database migration script
+│   ├── import_sample_data.py          # Sample data import
+│   ├── backup_database.py             # Database backup script
+│   ├── update_prices.py               # Manual price update script
+│   └── deploy.sh                      # Deployment script
+│
+├── docs/                              # Documentation
+│   ├── api.md                         # API documentation
+│   ├── setup.md                       # Setup instructions
+│   ├── deployment.md                  # Deployment guide
+│   ├── configuration.md               # Configuration guide
+│   └── screenshots/                   # Application screenshots
+│       ├── homepage.png
+│       ├── search-results.png
+│       └── dashboard.png
+│
+├── config/                            # Configuration files
+│   ├── development.py                 # Development settings
+│   ├── production.py                  # Production settings
+│   ├── testing.py                     # Testing settings
+│   ├── nginx.conf                     # Nginx configuration
+│   └── supervisor.conf                # Process management config
+│
+└── deployment/                        # Deployment files
+    ├── Dockerfile                     # Docker container setup
+    ├── docker-compose.yml             # Multi-container setup
+    ├── heroku.yml                     # Heroku deployment
+    ├── vercel.json                    # Vercel frontend deployment
+    └── aws/                           # AWS deployment files
+        ├── ec2-setup.sh
+        └── rds-setup.sql
+
+# Additional files that should exist:
+
+# .env (DO NOT COMMIT - add to .gitignore)
+# Contains actual environment variables:
+# EBAY_APP_ID=your_actual_app_id
+# EBAY_CERT_ID=your_actual_cert_id
+# DATABASE_URL=sqlite:///./data/database/film_price_guide.db
+# SECRET_KEY=your_secret_key
+# etc.
+
+# .gitignore example:
+# .env
+# __pycache__/
+# *.pyc
+# node_modules/
+# data/database/*.db
+# data/logs/*.log
+# data/cache/*
+# .DS_Store
+# dist/
+# build/
+
+# requirements.txt example:
+# flask==2.3.3
+# requests==2.31.0
+# python-dotenv==1.0.0
+# flask-cors==4.0.0
+# schedule==1.2.0
+# beautifulsoup4==4.12.2
+# sqlalchemy==2.0.19
+# flask-sqlalchemy==3.0.5
+# gunicorn==21.2.0
+
+# package.json example (if using build tools):
+# {
+#   "name": "film-price-guide",
+#   "version": "1.0.0",
+#   "scripts": {
+#     "build": "webpack --mode production",
+#     "dev": "webpack --mode development --watch",
+#     "serve": "python backend/app.py"
+#   },
+#   "devDependencies": {
+#     "webpack": "^5.88.0",
+#     "webpack-cli": "^5.1.4"
+#   }
+# }

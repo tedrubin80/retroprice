@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - RetroPrice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffffff, #4ecdc4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Dashboard Stats */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #4ecdc4;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.1rem;
+            color: #4ecdc4;
+            margin-bottom: 5px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 15px 0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            opacity: 0.7;
+        }
+
+        .tab.active {
+            opacity: 1;
+            color: #4ecdc4;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        }
+
+        /* Watchlist */
+        .watchlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .watchlist-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .watchlist-item:hover {
+            transform: translateY(-3px);
+            border-color: #4ecdc4;
+        }
+
+        .item-header-watch {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .item-image-small {
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(45deg, #2a2a3e, #3a3a5e);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .item-info-watch {
+            flex: 1;
+        }
+
+        .item-title-watch {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-subtitle-watch {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .price-info-watch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .current-price-watch {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .price-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .price-up {
+            color: #ff6b6b;
+        }
+
+        .price-down {
+            color: #4ecdc4;
+        }
+
+        .alert-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .alert-active {
+            border: 1px solid rgba(76, 205, 196, 0.3);
+            background: rgba(76, 205, 196, 0.1);
+        }
+
+        .remove-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 107, 107, 0.4);
+            transform: scale(1.1);
+        }
+
+        /* Alerts */
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .alert-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .alert-item:hover {
+            border-color: #4ecdc4;
+        }
+
+        .alert-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .alert-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .alert-time {
+            font-size: 0.8rem;
+            color: #4ecdc4;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #4ecdc4;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            border-color: #ff6b6b;
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .action-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .action-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .watchlist-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .alert-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">RetroPrice</div>
+            <div class="user-menu">
+                <span>Welcome back, Alex!</span>
+                <div class="user-avatar">A</div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">My Dashboard</h1>
+                <p class="page-subtitle">Track your watchlist, price alerts, and market insights</p>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">📌</div>
+                        <div class="stat-info">
+                            <h3>Watchlist Items</h3>
+                            <div class="stat-number">12</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">🔔</div>
+                        <div class="stat-info">
+                            <h3>Active Alerts</h3>
+                            <div class="stat-number">8</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>Potential Savings</h3>
+                            <div class="stat-number">$156</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <h3>Portfolio Value</h3>
+                            <div class="stat-number">$342</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="actions-grid">
+                    <div class="action-card" onclick="quickSearch()">
+                        <div class="action-icon">🔍</div>
+                        <div class="action-title">Search Items</div>
+                        <div class="action-description">Find new VHS & DVDs to track</div>
+                    </div>
+                    <div class="action-card" onclick="setAlert()">
+                        <div class="action-icon">⚡</div>
+                        <div class="action-title">Set Price Alert</div>
+                        <div class="action-description">Get notified of price drops</div>
+                    </div>
+                    <div class="action-card" onclick="viewTrending()">
+                        <div class="action-icon">🔥</div>
+                        <div class="action-title">Trending Items</div>
+                        <div class="action-description">See what's hot right now</div>
+                    </div>
+                    <div class="action-card" onclick="exportData()">
+                        <div class="action-icon">📊</div>
+                        <div class="action-title">Export Data</div>
+                        <div class="action-description">Download your tracking data</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('watchlist')">My Watchlist</div>
+                <div class="tab" onclick="switchTab('alerts')">Recent Alerts</div>
+            </div>
+
+            <!-- Watchlist Content -->
+            <div id="watchlist-content" class="tab-content">
+                <div class="watchlist-grid">
+                    <div class="watchlist-item" onclick="viewItem('jurassic-park-vhs')">
+                        <div class="item-header-watch">
+                            <div class="item-image-small">📼</div>
+                            <div class="item-info-watch">
+                                <div class="item-title-watch">Jurassic Park VHS (1993)</div>
+                                <div class="item-subtitle-watch">Universal Studios</div>
+                            </div>
+                        </div>
+                        <div class="price-info-watch">
+                            <div class="current-price-watch">$28.50</div>
+                            <div class="price-change price-up">
+                                ↗ +$2.50
+                            </div>
+                        </div>
+                        <div class="alert-status alert-active">
+                            <span>Alert: Below $25</span>
+                            <button class="remove-btn" onclick="removeFromWatchlist(event, 'jurassic-park-vhs')">×</button>
+                        </div>
+                    </div>
+
+                    <div class="watchlist-item" onclick="viewItem('terminator-vhs')">
+                        <div class="item-header-watch">
+                            <div class="item-image-small">📼</div>
+                            <div class="item-info-watch">
+                                <div class="item-title-watch">The Terminator VHS</div>
+                                <div class="item-subtitle-watch">Orion Pictures</div>
+                            </div>
+                        </div>
+                        <div class="price-info-watch">
+                            <div class="current-price-watch">$18.99</div>
+                            <div class="price-change price-down">
+                                ↘ -$1.00
+                            </div>
+                        </div>
+                        <div class="alert-status">
+                            <span>No alerts set</span>
+                            <button class="remove-btn" onclick="removeFromWatchlist(event, 'terminator-vhs')">×</button>
+                        </div>
+                    </div>
+
+                    <div class="watchlist-item" onclick="viewItem('blade-runner-dvd')">
+                        <div class="item-header-watch">
+                            <div class="item-image-small">💿</div>
+                            <div class="item-info-watch">
+                                <div class="item-title-watch">Blade Runner Director's Cut DVD</div>
+                                <div class="item-subtitle-watch">Warner Bros</div>
+                            </div>
+                        </div>
+                        <div class="price-info-watch">
+                            <div class="current-price-watch">$22.75</div>
+                            <div class="price-change price-up">
+                                ↗ +$0.75
+                            </div>
+                        </div>
+                        <div class="alert-status alert-active">
+                            <span>Alert: Below $20</span>
+                            <button class="remove-btn" onclick="removeFromWatchlist(event, 'blade-runner-dvd')">×</button>
+                        </div>
+                    </div>
+
+                    <div class="watchlist-item" onclick="viewItem('matrix-dvd')">
+                        <div class="item-header-watch">
+                            <div class="item-image-small">💿</div>
+                            <div class="item-info-watch">
+                                <div class="item-title-watch">The Matrix DVD Special Edition</div>
+                                <div class="item-subtitle-watch">Warner Bros</div>
+                            </div>
+                        </div>
+                        <div class="price-info-watch">
+                            <div class="current-price-watch">$15.50</div>
+                            <div class="price-change price-down">
+                                ↘ -$3.50
+                            </div>
+                        </div>
+                        <div class="alert-status alert-active">
+                            <span>🔥 ALERT TRIGGERED!</span>
+                            <button class="remove-btn" onclick="removeFromWatchlist(event, 'matrix-dvd')">×</button>
+                        </div>
+                    </div>
+
+                    <div class="watchlist-item" onclick="viewItem('alien-vhs')">
+                        <div class="item-header-watch">
+                            <div class="item-image-small">📼</div>
+                            <div class="item-info-watch">
+                                <div class="item-title-watch">Alien VHS (1979)</div>
+                                <div class="item-subtitle-watch">20th Century Fox</div>
+                            </div>
+                        </div>
+                        <div class="price-info-watch">
+                            <div class="current-price-watch">$35.99</div>
+                            <div class="price-change price-up">
+                                ↗ +$5.00
+                            </div>
+                        </div>
+                        <div class="alert-status">
+                            <span>No alerts set</span>
+                            <button class="remove-btn" onclick="removeFromWatchlist(event, 'alien-vhs')">×</button>
+                        </div>
+                    </div>
+
+                    <div class="watchlist-item" onclick="viewItem('star-wars-vhs')">
+                        <div class="item-header-watch">
+                            <div class="item-image-small">📼</div>
+                            <div class="item-info-watch">
+                                <div class="item-title-watch">Star Wars VHS Original Trilogy</div>
+                                <div class="item-subtitle-watch">20th Century Fox</div>
+                            </div>
+                        </div>
+                        <div class="price-info-watch">
+                            <div class="current-price-watch">$89.99</div>
+                            <div class="price-change price-up">
+                                ↗ +$12.00
+                            </div>
+                        </div>
+                        <div class="alert-status alert-active">
+                            <span>Alert: Below $75</span>
+                            <button class="remove-btn" onclick="removeFromWatchlist(event, 'star-wars-vhs')">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Content -->
+            <div id="alerts-content" class="tab-content hidden">
+                <div class="alerts-list">
+                    <div class="alert-item">
+                        <div class="alert-icon">🔥</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Price Alert Triggered!</div>
+                            <div class="alert-description">The Matrix DVD dropped to $15.50 - below your $19 target</div>
+                            <div class="alert-time">2 hours ago</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon">📈</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Price Increase</div>
+                            <div class="alert-description">Jurassic Park VHS increased by $2.50 in the last 7 days</div>
+                            <div class="alert-time">1 day ago</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon">⭐</div>
+                        <div class="alert-content">
+                            <div class="alert-title">New Rare Item Found</div>
+                            <div class="alert-description">Blade Runner Final Cut Limited Edition spotted on Heritage Auctions</div>
+                            <div class="alert-time">3 days ago</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Market Insight</div>
+                            <div class="alert-description">Sci-fi VHS prices trending up 15% this month - consider selling</div>
+                            <div class="alert-time">1 week ago</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon">🎯</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Target Price Achieved</div>
+                            <div class="alert-description">Terminator VHS hit your target price of $19.99</div>
+                            <div class="alert-time">1 week ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function switchTab(tabName) {
+            // Update tab active state
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(tabName + '-content').classList.remove('hidden');
+        }
+
+        function viewItem(itemId) {
+            alert(`Would navigate to item detail page for: ${itemId}`);
+        }
+
+        function removeFromWatchlist(event, itemId) {
+            event.stopPropagation();
+            if (confirm('Remove this item from your watchlist?')) {
+                event.target.closest('.watchlist-item').style.opacity = '0.5';
+                event.target.closest('.watchlist-item').style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    event.target.closest('.watchlist-item').remove();
+                    updateStats();
+                }, 300);
+            }
+        }
+
+        function updateStats() {
+            const watchlistCount = document.querySelectorAll('.watchlist-item').length;
+            document.querySelector('.dashboard-stats .stat-number').textContent = watchlistCount;
+        }
+
+        function quickSearch() {
+            alert('Would open search modal or navigate to search page');
+        }
+
+        function setAlert() {
+            alert('Would open price alert setup modal');
+        }
+
+        function viewTrending() {
+            alert('Would navigate to trending items page');
+        }
+
+        function exportData() {
+            alert('Would trigger data export download');
+        }
+
+        // Simulate real-time price updates
+        setInterval(() => {
+            const priceElements = document.querySelectorAll('.current-price-watch');
+            priceElements.forEach(el => {
+                const currentPrice = parseFloat(el.textContent.replace('$', ''));
+                const change = (Math.random() - 0.5) * 1; // Small random change
+                const newPrice = Math.max(0, currentPrice + change);
+                el.textContent = `$${newPrice.toFixed(2)}`;
+            });
+        }, 30000); // Update every 30 seconds for demo
+
+        // Add pulse animation to triggered alerts
+        document.querySelectorAll('.alert-status').forEach(alert => {
+            if (alert.textContent.includes('TRIGGERED')) {
+                setInterval(() => {
+                    alert.style.backgroundColor = alert.style.backgroundColor === 'rgba(255, 107, 107, 0.2)' 
+                        ? 'rgba(76, 205, 196, 0.1)' 
+                        : 'rgba(255, 107, 107, 0.2)';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

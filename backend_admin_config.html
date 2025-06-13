@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroPrice - Backend Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .security-notice {
+            background: rgba(76, 205, 196, 0.1);
+            border: 1px solid rgba(76, 205, 196, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #4ecdc4;
+        }
+
+        .security-notice h4 {
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+
+        .tab:not(.active):hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .config-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4ecdc4;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .form-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: #4ecdc4;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-test {
+            background: rgba(76, 205, 196, 0.2);
+            color: #4ecdc4;
+            border: 1px solid rgba(76, 205, 196, 0.3);
+        }
+
+        .btn-test:hover {
+            background: rgba(76, 205, 196, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-connected {
+            background: rgba(76, 205, 196, 0.2);
+            color: #4ecdc4;
+            border: 1px solid rgba(76, 205, 196, 0.3);
+        }
+
+        .status-disconnected {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .status-testing {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .test-results {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .test-success {
+            background: rgba(76, 205, 196, 0.1);
+            border: 1px solid rgba(76, 205, 196, 0.3);
+            color: #4ecdc4;
+        }
+
+        .test-error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .credentials-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .env-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 10px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .form-row,
+            .credentials-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                margin-bottom: 5px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #4ecdc4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Backend Configuration</h1>
+            <p class="subtitle">Configure your RetroPrice application settings and API credentials</p>
+            
+            <div class="security-notice">
+                <h4>🔒 Security Information</h4>
+                <p>This configuration will be stored securely on your server. API credentials are encrypted and never exposed to frontend users.</p>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('ebay')">eBay API</div>
+            <div class="tab" onclick="switchTab('omdb')">OMDb API</div>
+            <div class="tab" onclick="switchTab('tmdb')">TMDb API</div>
+            <div class="tab" onclick="switchTab('database')">Database</div>
+            <div class="tab" onclick="switchTab('general')">General Settings</div>
+            <div class="tab" onclick="switchTab('env')">Environment</div>
+        </div>
+
+        <!-- eBay API Configuration -->
+        <div id="ebay-content" class="tab-content active">
+            <div class="config-section">
+                <h2 class="section-title">
+                    🛒 eBay API Configuration
+                    <div class="status-indicator" id="ebayStatus">
+                        <span class="status-disconnected">● Disconnected</span>
+                    </div>
+                </h2>
+
+                <div class="info-box">
+                    <strong>Getting Started:</strong> Visit <a href="https://developer.ebay.com/" target="_blank" style="color: #4ecdc4;">developer.ebay.com</a> to create your app and get credentials. Use sandbox for testing, production for live data.
+                </div>
+
+                <form id="ebayForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">App ID (Client ID)</label>
+                            <input type="text" class="form-input" id="ebayAppId" placeholder="YourAppName-YourAppId-PRD-123abc456" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cert ID (Client Secret)</label>
+                            <input type="password" class="form-input" id="ebayCertId" placeholder="PRD-123abc456def789..." required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Dev ID</label>
+                            <input type="text" class="form-input" id="ebayDevId" placeholder="12345abc-6789-def0-1234-56789abcdef0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Environment</label>
+                            <select class="form-select" id="ebayEnvironment">
+                                <option value="sandbox">Sandbox (Testing)</option>
+                                <option value="production">Production (Live)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">OAuth User Token (Optional - for advanced features)</label>
+                        <input type="password" class="form-input" id="ebayUserToken" placeholder="v^1.1#i^1#...">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enablePriceUpdates" checked>
+                        <label for="enablePriceUpdates">Enable automatic price updates</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableRateLimiting" checked>
+                        <label for="enableRateLimiting">Enable rate limiting (recommended)</label>
+                    </div>
+
+                    <button type="button" class="btn btn-test" onclick="testEbayConnection()">
+                        🧪 Test Connection
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save eBay Config
+                    </button>
+                </form>
+
+                <div id="ebayTestResults" class="test-results hidden"></div>
+            </div>
+        </div>
+
+        <!-- OMDb API Configuration -->
+        <div id="omdb-content" class="tab-content">
+            <div class="config-section">
+                <h2 class="section-title">
+                    🎬 OMDb API Configuration
+                    <div class="status-indicator" id="omdbStatus">
+                        <span class="status-disconnected">● Disconnected</span>
+                    </div>
+                </h2>
+
+                <div class="info-box">
+                    <strong>The Open Movie Database:</strong> Visit <a href="http://www.omdbapi.com/apikey.aspx" target="_blank" style="color: #4ecdc4;">omdbapi.com</a> to get your free API key. OMDb provides movie metadata, posters, and IMDb information to enrich your film database.
+                </div>
+
+                <form id="omdbForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">API Key</label>
+                            <input type="password" class="form-input" id="omdbApiKey" placeholder="Enter your OMDb API key" required>
+                            <small style="color: rgba(255, 255, 255, 0.7); margin-top: 5px; display: block;">
+                                Free: 1,000 daily requests • Patreon: 100,000+ requests
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Plan Type</label>
+                            <select class="form-select" id="omdbPlanType">
+                                <option value="free">Free (1,000/day)</option>
+                                <option value="patreon">Patreon (100,000/day)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Base URL</label>
+                            <input type="text" class="form-input" id="omdbBaseUrl" value="http://www.omdbapi.com/" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Poster URL</label>
+                            <input type="text" class="form-input" id="omdbPosterUrl" value="http://img.omdbapi.com/" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Default Response Format</label>
+                        <select class="form-select" id="omdbResponseFormat">
+                            <option value="json">JSON (Recommended)</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableMovieEnrichment" checked>
+                        <label for="enableMovieEnrichment">Auto-enrich movies with OMDb data</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enablePosterDownload" checked>
+                        <label for="enablePosterDownload">Download and cache movie posters</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableImdbIntegration">
+                        <label for="enableImdbIntegration">Enable IMDb ID lookups</label>
+                    </div>
+
+                    <button type="button" class="btn btn-test" onclick="testOmdbConnection()">
+                        🧪 Test OMDb Connection
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save OMDb Config
+                    </button>
+                </form>
+
+                <div id="omdbTestResults" class="test-results hidden"></div>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <strong>What OMDb provides:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Movie titles, plots, and descriptions</li>
+                        <li>Release years, runtimes, and ratings (G, PG, R, etc.)</li>
+                        <li>Director, cast, and crew information</li>
+                        <li>Genre classifications and IMDb ratings</li>
+                        <li>High-quality movie posters (up to 2000x3000)</li>
+                        <li>IMDb IDs for cross-referencing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TMDb API Configuration -->
+        <div id="tmdb-content" class="tab-content">
+            <div class="config-section">
+                <h2 class="section-title">
+                    🎭 TMDb API Configuration
+                    <div class="status-indicator" id="tmdbStatus">
+                        <span class="status-disconnected">● Disconnected</span>
+                    </div>
+                </h2>
+
+                <div class="info-box">
+                    <strong>The Movie Database:</strong> Visit <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color: #4ecdc4;">themoviedb.org/settings/api</a> to get your free API key. TMDb provides comprehensive movie data, high-quality images, and modern film information.
+                </div>
+
+                <form id="tmdbForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">API Key (Read Access Token)</label>
+                            <input type="password" class="form-input" id="tmdbApiKey" placeholder="Enter your TMDb API Read Access Token" required>
+                            <small style="color: rgba(255, 255, 255, 0.7); margin-top: 5px; display: block;">
+                                Free: 40 requests/10 seconds • Commercial: Higher limits available
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">API Version</label>
+                            <select class="form-select" id="tmdbApiVersion">
+                                <option value="3">Version 3 (Stable)</option>
+                                <option value="4">Version 4 (Latest)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Base URL</label>
+                            <input type="text" class="form-input" id="tmdbBaseUrl" value="https://api.themoviedb.org/3/" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Image Base URL</label>
+                            <input type="text" class="form-input" id="tmdbImageUrl" value="https://image.tmdb.org/t/p/" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Default Language</label>
+                            <select class="form-select" id="tmdbLanguage">
+                                <option value="en-US">English (US)</option>
+                                <option value="en-GB">English (UK)</option>
+                                <option value="es-ES">Spanish</option>
+                                <option value="fr-FR">French</option>
+                                <option value="de-DE">German</option>
+                                <option value="ja-JP">Japanese</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Image Quality</label>
+                            <select class="form-select" id="tmdbImageQuality">
+                                <option value="w500">Medium (500px width)</option>
+                                <option value="w780">High (780px width)</option>
+                                <option value="w1280">Very High (1280px width)</option>
+                                <option value="original">Original (Full resolution)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableTmdbEnrichment" checked>
+                        <label for="enableTmdbEnrichment">Auto-enrich movies with TMDb data</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableTmdbImages" checked>
+                        <label for="enableTmdbImages">Download posters and backdrops</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableTmdbVideos">
+                        <label for="enableTmdbVideos">Fetch trailers and video content</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableTmdbCredits" checked>
+                        <label for="enableTmdbCredits">Include cast and crew information</label>
+                    </div>
+
+                    <button type="button" class="btn btn-test" onclick="testTmdbConnection()">
+                        🧪 Test TMDb Connection
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save TMDb Config
+                    </button>
+                </form>
+
+                <div id="tmdbTestResults" class="test-results hidden"></div>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <strong>What TMDb provides:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Comprehensive movie database with modern films</li>
+                        <li>High-quality posters, backdrops, and still images</li>
+                        <li>Detailed cast and crew information</li>
+                        <li>User ratings, popularity scores, and reviews</li>
+                        <li>Release dates for different regions</li>
+                        <li>Trailers, teasers, and behind-the-scenes videos</li>
+                        <li>Multiple language support and translations</li>
+                        <li>Collection and franchise information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Configuration -->
+        <div id="database-content" class="tab-content">
+            <div class="config-section">
+                <h2 class="section-title">
+                    🗄️ Database Configuration
+                    <div class="status-indicator" id="dbStatus">
+                        <span class="status-disconnected">● Disconnected</span>
+                    </div>
+                </h2>
+
+                <form id="databaseForm">
+                    <div class="form-group">
+                        <label class="form-label">Database Type</label>
+                        <select class="form-select" id="dbType" onchange="toggleDbFields()">
+                            <option value="sqlite">SQLite (Recommended for small apps)</option>
+                            <option value="postgresql">PostgreSQL (Recommended for production)</option>
+                            <option value="mysql">MySQL</option>
+                        </select>
+                    </div>
+
+                    <div id="sqliteFields">
+                        <div class="form-group">
+                            <label class="form-label">Database File Path</label>
+                            <input type="text" class="form-input" id="sqlitePath" value="./data/retroprice.db" placeholder="./data/retroprice.db">
+                        </div>
+                    </div>
+
+                    <div id="postgresFields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Host</label>
+                                <input type="text" class="form-input" id="pgHost" placeholder="localhost" value="localhost">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Port</label>
+                                <input type="number" class="form-input" id="pgPort" placeholder="5432" value="5432">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Database Name</label>
+                                <input type="text" class="form-input" id="pgDatabase" placeholder="retroprice" value="retroprice">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" id="pgUsername" placeholder="retroprice_user">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="pgPassword" placeholder="your_secure_password">
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableBackups" checked>
+                        <label for="enableBackups">Enable automatic backups</label>
+                    </div>
+
+                    <button type="button" class="btn btn-test" onclick="testDatabaseConnection()">
+                        🧪 Test Database Connection
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save Database Config
+                    </button>
+                </form>
+
+                <div id="dbTestResults" class="test-results hidden"></div>
+            </div>
+        </div>
+
+        <!-- General Settings -->
+        <div id="general-content" class="tab-content">
+            <div class="config-section">
+                <h2 class="section-title">⚙️ General Application Settings</h2>
+
+                <form id="generalForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Application Name</label>
+                            <input type="text" class="form-input" id="appName" value="RetroPrice" placeholder="RetroPrice">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Admin Email</label>
+                            <input type="email" class="form-input" id="adminEmail" placeholder="admin@yoursite.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Price Update Frequency</label>
+                            <select class="form-select" id="updateFrequency">
+                                <option value="hourly">Every Hour</option>
+                                <option value="daily" selected>Daily</option>
+                                <option value="weekly">Weekly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Max Items per Search</label>
+                            <input type="number" class="form-input" id="maxItems" value="100" min="10" max="200">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Supported Formats (comma separated)</label>
+                        <input type="text" class="form-input" id="supportedFormats" value="VHS, DVD, Blu-ray" placeholder="VHS, DVD, Blu-ray">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableEmailAlerts" checked>
+                        <label for="enableEmailAlerts">Enable email price alerts</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableRarityScoring">
+                        <label for="enableRarityScoring">Enable automatic rarity scoring</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="enableDebugMode">
+                        <label for="enableDebugMode">Enable debug mode (development only)</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        💾 Save General Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Environment Variables -->
+        <div id="env-content" class="tab-content">
+            <div class="config-section">
+                <h2 class="section-title">📋 Environment Variables</h2>
+
+                <div class="info-box">
+                    <strong>Instructions:</strong> Copy this content to your <code>.env</code> file in your project root directory. Never commit this file to version control.
+                </div>
+
+                <button class="copy-btn" onclick="copyEnvToClipboard()">📋 Copy to Clipboard</button>
+                <div class="env-preview" id="envPreview">
+                    # Film Price Guide Environment Configuration
+# Generated: <span id="envTimestamp"></span>
+
+# eBay API Configuration
+EBAY_APP_ID=your_app_id_here
+EBAY_CERT_ID=your_cert_id_here
+EBAY_DEV_ID=your_dev_id_here
+EBAY_USER_TOKEN=your_user_token_here
+EBAY_ENVIRONMENT=sandbox
+
+# OMDb API Configuration
+OMDB_API_KEY=your_omdb_api_key_here
+OMDB_PLAN_TYPE=free
+OMDB_BASE_URL=http://www.omdbapi.com/
+OMDB_POSTER_URL=http://img.omdbapi.com/
+OMDB_RESPONSE_FORMAT=json
+
+# TMDb API Configuration
+TMDB_API_KEY=your_tmdb_api_key_here
+TMDB_API_VERSION=3
+TMDB_BASE_URL=https://api.themoviedb.org/3/
+TMDB_IMAGE_URL=https://image.tmdb.org/t/p/
+TMDB_LANGUAGE=en-US
+TMDB_IMAGE_QUALITY=w500
+
+# Database Configuration
+DATABASE_TYPE=mysql
+DATABASE_URL=mysql://username:password@localhost:3306/film_price_guide
+
+# Application Settings
+APP_NAME=Film Price Guide
+ADMIN_EMAIL=admin@yoursite.com
+DEBUG_MODE=false
+SECRET_KEY=your_secret_key_here
+
+# eBay Features
+ENABLE_PRICE_UPDATES=true
+ENABLE_RATE_LIMITING=true
+UPDATE_FREQUENCY=daily
+MAX_ITEMS_PER_SEARCH=100
+
+# OMDb Features
+ENABLE_MOVIE_ENRICHMENT=true
+ENABLE_POSTER_DOWNLOAD=true
+ENABLE_IMDB_INTEGRATION=false
+
+# TMDb Features
+ENABLE_TMDB_ENRICHMENT=true
+ENABLE_TMDB_IMAGES=true
+ENABLE_TMDB_VIDEOS=false
+ENABLE_TMDB_CREDITS=true
+
+# General Features
+ENABLE_EMAIL_ALERTS=true
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Custom Environment Variables</label>
+                    <textarea class="form-textarea" id="customEnvVars" placeholder="Add any custom environment variables here...
+CUSTOM_SETTING=value
+ANOTHER_SETTING=another_value"></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary" onclick="updateEnvPreview()">
+                    🔄 Update Preview
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="downloadEnvFile()">
+                    📥 Download .env File
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
+        // Database field toggling
+        function toggleDbFields() {
+            const dbType = document.getElementById('dbType').value;
+            document.getElementById('sqliteFields').classList.toggle('hidden', dbType !== 'sqlite');
+            document.getElementById('postgresFields').classList.toggle('hidden', dbType !== 'postgresql');
+        }
+
+        // TMDb API testing
+        async function testTmdbConnection() {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            const apiVersion = document.getElementById('tmdbApiVersion').value;
+            const language = document.getElementById('tmdbLanguage').value;
+
+            if (!apiKey) {
+                showTestResults('tmdbTestResults', 'error', 'Please enter your TMDb API key');
+                return;
+            }
+
+            updateStatus('tmdbStatus', 'testing', 'Testing...');
+            
+            try {
+                // Simulate API test with a popular movie
+                await simulateApiTest();
+                
+                const testResult = `
+✅ TMDb API Connection Test Results:
+🔑 API Key: ${apiKey.substring(0, 12)}...
+📊 Version: API v${apiVersion}
+🌐 Language: ${language}
+✅ Movie search test: SUCCESS
+✅ Image configuration: SUCCESS
+✅ Credits lookup: SUCCESS
+⏱️ Response time: 156ms
+
+🎉 TMDb API is working correctly!
+
+Test Movie Data Retrieved:
+🎬 Title: "Jurassic Park"
+📅 Release Date: 1993-06-11
+🎭 Director: Steven Spielberg
+⭐ TMDb Rating: 8.2/10 (11,547 votes)
+🖼️ Poster: Available (original quality)
+🎬 Backdrop: Available (1920x1080)
+🎥 Videos: 15 trailers and clips available
+                `;
+                
+                showTestResults('tmdbTestResults', 'success', testResult);
+                updateStatus('tmdbStatus', 'connected', 'Connected');
+                
+            } catch (error) {
+                const errorResult = `
+❌ TMDb API Connection Test Failed:
+🔑 API Key: ${apiKey.substring(0, 12)}...
+❌ Error: ${error.message}
+💡 Troubleshooting:
+   - Verify your API key (Read Access Token) is correct
+   - Check if your account is active and verified
+   - Ensure you're not exceeding rate limits (40 req/10sec)
+   - Make sure API key has proper permissions
+   - Try regenerating your API key if issues persist
+                `;
+                
+                showTestResults('tmdbTestResults', 'error', errorResult);
+                updateStatus('tmdbStatus', 'disconnected', 'Connection Failed');
+            }
+        }
+        async function testOmdbConnection() {
+            const apiKey = document.getElementById('omdbApiKey').value;
+            const planType = document.getElementById('omdbPlanType').value;
+
+            if (!apiKey) {
+                showTestResults('omdbTestResults', 'error', 'Please enter your OMDb API key');
+                return;
+            }
+
+            updateStatus('omdbStatus', 'testing', 'Testing...');
+            
+            try {
+                // Simulate API test with a popular movie
+                await simulateApiTest();
+                
+                const testResult = `
+✅ OMDb API Connection Test Results:
+🔑 API Key: ${apiKey.substring(0, 8)}...
+📊 Plan: ${planType.charAt(0).toUpperCase() + planType.slice(1)}
+✅ Movie lookup test: SUCCESS
+✅ Poster API access: SUCCESS
+✅ IMDb integration: SUCCESS
+⏱️ Response time: 187ms
+
+🎉 OMDb API is working correctly!
+
+Test Movie Data Retrieved:
+🎬 Title: "Jurassic Park"
+📅 Year: 1993
+🎭 Director: Steven Spielberg
+⭐ IMDb Rating: 8.1/10
+🖼️ Poster: Available (2000x3000)
+                `;
+                
+                showTestResults('omdbTestResults', 'success', testResult);
+                updateStatus('omdbStatus', 'connected', 'Connected');
+                
+            } catch (error) {
+                const errorResult = `
+❌ OMDb API Connection Test Failed:
+🔑 API Key: ${apiKey.substring(0, 8)}...
+❌ Error: ${error.message}
+💡 Troubleshooting:
+   - Verify your API key is correct and active
+   - Check if you've exceeded your daily limit
+   - Ensure your plan type matches your actual subscription
+   - Free plan: 1,000 requests/day
+   - Patreon plan: 100,000+ requests/day
+                `;
+                
+                showTestResults('omdbTestResults', 'error', errorResult);
+                updateStatus('omdbStatus', 'disconnected', 'Connection Failed');
+            }
+        }
+        async function testEbayConnection() {
+            const appId = document.getElementById('ebayAppId').value;
+            const certId = document.getElementById('ebayCertId').value;
+            const environment = document.getElementById('ebayEnvironment').value;
+
+            if (!appId || !certId) {
+                showTestResults('ebayTestResults', 'error', 'Please fill in App ID and Cert ID');
+                return;
+            }
+
+            updateStatus('ebayStatus', 'testing', 'Testing...');
+            
+            try {
+                // Simulate API test
+                await simulateApiTest();
+                
+                const testResult = `
+✅ eBay API Connection Test Results:
+🔗 Environment: ${environment}
+🔑 App ID: ${appId.substring(0, 10)}...
+✅ OAuth token generation: SUCCESS
+✅ Finding API access: SUCCESS
+✅ Browse API access: SUCCESS
+⏱️ Response time: 234ms
+
+🎉 All tests passed! Your eBay API configuration is working correctly.
+                `;
+                
+                showTestResults('ebayTestResults', 'success', testResult);
+                updateStatus('ebayStatus', 'connected', 'Connected');
+                
+            } catch (error) {
+                const errorResult = `
+❌ eBay API Connection Test Failed:
+🔗 Environment: ${environment}
+❌ Error: ${error.message}
+💡 Troubleshooting:
+   - Verify your App ID and Cert ID are correct
+   - Check if your eBay developer account is active
+   - Ensure you're using the right environment (sandbox/production)
+                `;
+                
+                showTestResults('ebayTestResults', 'error', errorResult);
+                updateStatus('ebayStatus', 'disconnected', 'Connection Failed');
+            }
+        }
+
+        // Database testing
+        async function testDatabaseConnection() {
+            const dbType = document.getElementById('dbType').value;
+            updateStatus('dbStatus', 'testing', 'Testing...');
+            
+            try {
+                await simulateApiTest();
+                
+                const testResult = `
+✅ Database Connection Test Results:
+🗄️ Database Type: ${dbType.toUpperCase()}
+✅ Connection established: SUCCESS
+✅ Tables created/verified: SUCCESS
+✅ Read/Write test: SUCCESS
+📊 Sample query execution: SUCCESS
+
+🎉 Database configuration is working correctly!
+                `;
+                
+                showTestResults('dbTestResults', 'success', testResult);
+                updateStatus('dbStatus', 'connected', 'Connected');
+                
+            } catch (error) {
+                showTestResults('dbTestResults', 'error', 'Database connection failed: ' + error.message);
+                updateStatus('dbStatus', 'disconnected', 'Connection Failed');
+            }
+        }
+
+        // Form submissions
+        document.getElementById('ebayForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveConfiguration('eBay API', {
+                appId: document.getElementById('ebayAppId').value,
+                certId: document.getElementById('ebayCertId').value,
+                devId: document.getElementById('ebayDevId').value,
+                environment: document.getElementById('ebayEnvironment').value,
+                userToken: document.getElementById('ebayUserToken').value,
+                priceUpdates: document.getElementById('enablePriceUpdates').checked,
+                rateLimiting: document.getElementById('enableRateLimiting').checked
+            });
+        });
+
+        document.getElementById('omdbForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveConfiguration('OMDb API', {
+                apiKey: document.getElementById('omdbApiKey').value,
+                planType: document.getElementById('omdbPlanType').value,
+                baseUrl: document.getElementById('omdbBaseUrl').value,
+                posterUrl: document.getElementById('omdbPosterUrl').value,
+                responseFormat: document.getElementById('omdbResponseFormat').value,
+                movieEnrichment: document.getElementById('enableMovieEnrichment').checked,
+                posterDownload: document.getElementById('enablePosterDownload').checked,
+                imdbIntegration: document.getElementById('enableImdbIntegration').checked
+            });
+        });
+
+        document.getElementById('tmdbForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveConfiguration('TMDb API', {
+                apiKey: document.getElementById('tmdbApiKey').value,
+                apiVersion: document.getElementById('tmdbApiVersion').value,
+                baseUrl: document.getElementById('tmdbBaseUrl').value,
+                imageUrl: document.getElementById('tmdbImageUrl').value,
+                language: document.getElementById('tmdbLanguage').value,
+                imageQuality: document.getElementById('tmdbImageQuality').value,
+                tmdbEnrichment: document.getElementById('enableTmdbEnrichment').checked,
+                tmdbImages: document.getElementById('enableTmdbImages').checked,
+                tmdbVideos: document.getElementById('enableTmdbVideos').checked,
+                tmdbCredits: document.getElementById('enableTmdbCredits').checked
+            });
+        });
+
+        document.getElementById('databaseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const dbType = document.getElementById('dbType').value;
+            let config = { type: dbType };
+            
+            if (dbType === 'sqlite') {
+                config.path = document.getElementById('sqlitePath').value;
+            } else if (dbType === 'postgresql') {
+                config.host = document.getElementById('pgHost').value;
+                config.port = document.getElementById('pgPort').value;
+                config.database = document.getElementById('pgDatabase').value;
+                config.username = document.getElementById('pgUsername').value;
+                config.password = document.getElementById('pgPassword').value;
+            }
+            
+            saveConfiguration('Database', config);
+        });
+
+        document.getElementById('generalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveConfiguration('General Settings', {
+                appName: document.getElementById('appName').value,
+                adminEmail: document.getElementById('adminEmail').value,
+                updateFrequency: document.getElementById('updateFrequency').value,
+                maxItems: document.getElementById('maxItems').value,
+                supportedFormats: document.getElementById('supportedFormats').value,
+                emailAlerts: document.getElementById('enableEmailAlerts').checked,
+                rarityScoring: document.getElementById('enableRarityScoring').checked,
+                debugMode: document.getElementById('enableDebugMode').checked
+            });
+        });
+
+        // Utility functions
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.className = 'status-indicator';
+            element.innerHTML = `<span class="status-${status}">● ${text}</span>`;
+        }
+
+        function showTestResults(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = `test-results test-${type}`;
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+
+        async function simulateApiTest() {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    // Simulate random success/failure for demo
+                    if (Math.random() > 0.1) {
+                        resolve();
+                    } else {
+                        reject(new Error('Simulated connection error'));
+                    }
+                }, 2000);
+            });
+        }
+
+        function saveConfiguration(configType, data) {
+            // Simulate saving configuration
+            alert(`${configType} configuration saved successfully!\n\nIn a real implementation, this would:\n- Validate the data\n- Encrypt sensitive information\n- Update the .env file\n- Restart services if needed`);
+            updateEnvPreview();
+        }
+
+        function updateEnvPreview() {
+            const timestamp = new Date().toISOString();
+            document.getElementById('envTimestamp').textContent = timestamp;
+            
+            // Get current form values and update the preview
+            const appId = document.getElementById('ebayAppId').value || 'your_app_id_here';
+            const certId = document.getElementById('ebayCertId').value || 'your_cert_id_here';
+            const devId = document.getElementById('ebayDevId').value || 'your_dev_id_here';
+            const environment = document.getElementById('ebayEnvironment').value;
+            
+            const envContent = `# RetroPrice Environment Configuration
+# Generated: ${timestamp}
+
+# eBay API Configuration
+EBAY_APP_ID=${appId}
+EBAY_CERT_ID=${certId}
+EBAY_DEV_ID=${devId}
+EBAY_USER_TOKEN=${document.getElementById('ebayUserToken').value || 'your_user_token_here'}
+EBAY_ENVIRONMENT=${environment}
+
+# Database Configuration
+DATABASE_TYPE=${document.getElementById('dbType').value}
+DATABASE_URL=${getDatabaseUrl()}
+
+# Application Settings
+APP_NAME=${document.getElementById('appName').value || 'RetroPrice'}
+ADMIN_EMAIL=${document.getElementById('adminEmail').value || 'admin@yoursite.com'}
+DEBUG_MODE=${document.getElementById('enableDebugMode').checked}
+SECRET_KEY=your_secret_key_here
+
+# Features
+ENABLE_PRICE_UPDATES=${document.getElementById('enablePriceUpdates').checked}
+ENABLE_EMAIL_ALERTS=${document.getElementById('enableEmailAlerts').checked}
+ENABLE_RATE_LIMITING=${document.getElementById('enableRateLimiting').checked}
+UPDATE_FREQUENCY=${document.getElementById('updateFrequency').value}
+MAX_ITEMS_PER_SEARCH=${document.getElementById('maxItems').value}
+
+${document.getElementById('customEnvVars').value}`;
+
+            document.getElementById('envPreview').innerHTML = envContent;
+        }
+
+        function getDatabaseUrl() {
+            const dbType = document.getElementById('dbType').value;
+            if (dbType === 'sqlite') {
+                return `sqlite:///${document.getElementById('sqlitePath').value || './data/retroprice.db'}`;
+            } else if (dbType === 'postgresql') {
+                const host = document.getElementById('pgHost').value || 'localhost';
+                const port = document.getElementById('pgPort').value || '5432';
+                const db = document.getElementById('pgDatabase').value || 'retroprice';
+                const user = document.getElementById('pgUsername').value || 'user';
+                const pass = document.getElementById('pgPassword').value || 'password';
+                return `postgresql://${user}:${pass}@${host}:${port}/${db}`;
+            }
+            return 'your_database_url_here';
+        }
+
+        function copyEnvToClipboard() {
+            const envContent = document.getElementById('envPreview').textContent;
+            navigator.clipboard.writeText(envContent).then(() => {
+                alert('Environment configuration copied to clipboard!');
+            });
+        }
+
+        function downloadEnvFile() {
+            const envContent = document.getElementById('envPreview').textContent;
+            const blob = new Blob([envContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '.env';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            updateEnvPreview();
+        });
+    </script>
+</body>
+</html>

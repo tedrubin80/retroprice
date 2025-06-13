@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - RetroPrice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header (simplified) */
+        header {
+            padding: 20px 0;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-header {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 40px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+        }
+
+        .results-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .results-info h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .results-count {
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: #4ecdc4;
+        }
+
+        .sort-dropdown {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            border-color: #4ecdc4;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #2a2a3e, #3a3a5e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .item-card:hover .item-image::after {
+            transform: translateX(100%);
+        }
+
+        .item-info {
+            padding: 20px;
+        }
+
+        .item-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ffffff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-year {
+            color: #4ecdc4;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .price-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .current-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .price-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .trend-up {
+            color: #ff6b6b;
+        }
+
+        .trend-down {
+            color: #4ecdc4;
+        }
+
+        .item-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .rarity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .rarity-common {
+            background: rgba(128, 128, 128, 0.3);
+            color: #cccccc;
+        }
+
+        .rarity-uncommon {
+            background: rgba(76, 205, 196, 0.3);
+            color: #4ecdc4;
+        }
+
+        .rarity-rare {
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(45deg, #ff6b6b, #ffd700);
+            color: white;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 40px 0;
+        }
+
+        .page-btn {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: #4ecdc4;
+            border-color: #4ecdc4;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .search-header {
+                margin: 20px 0 0 0;
+                order: 3;
+                width: 100%;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filters {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">RetroPrice</div>
+            <div class="search-header">
+                <input type="text" class="search-bar" placeholder="Search VHS & DVDs..." value="Jurassic Park">
+                <button class="search-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Results Header -->
+            <div class="results-header">
+                <div class="results-info">
+                    <h1>Search Results for "Jurassic Park"</h1>
+                    <div class="results-count">Found 24 results across VHS and DVD formats</div>
+                </div>
+                <div class="filters">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">VHS</button>
+                    <button class="filter-btn">DVD</button>
+                    <button class="filter-btn">Sealed</button>
+                    <select class="sort-dropdown">
+                        <option>Sort by: Price (Low to High)</option>
+                        <option>Price (High to Low)</option>
+                        <option>Recently Sold</option>
+                        <option>Rarity</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Results Grid -->
+            <div class="results-grid">
+                <div class="item-card" onclick="viewItem('jurassic-park-vhs-1993')">
+                    <div class="item-image">📼</div>
+                    <div class="item-info">
+                        <div class="rarity-badge rarity-uncommon">Uncommon</div>
+                        <div class="item-title">Jurassic Park VHS (1993)</div>
+                        <div class="item-year">Universal Studios • 1993</div>
+                        <div class="price-info">
+                            <div class="current-price">$28.50</div>
+                            <div class="price-trend trend-up">
+                                ↗ +12% (30d)
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <span>127 sold</span>
+                            <span>Last: 2 days ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card" onclick="viewItem('jurassic-park-dvd-collector')">
+                    <div class="item-image">💿</div>
+                    <div class="item-info">
+                        <div class="rarity-badge rarity-rare">Rare</div>
+                        <div class="item-title">Jurassic Park DVD Collector's Edition</div>
+                        <div class="item-year">Universal Studios • 2000</div>
+                        <div class="price-info">
+                            <div class="current-price">$45.99</div>
+                            <div class="price-trend trend-down">
+                                ↘ -5% (30d)
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <span>43 sold</span>
+                            <span>Last: 1 week ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card" onclick="viewItem('jurassic-park-vhs-sealed')">
+                    <div class="item-image">📼</div>
+                    <div class="item-info">
+                        <div class="rarity-badge rarity-legendary">Legendary</div>
+                        <div class="item-title">Jurassic Park VHS Factory Sealed</div>
+                        <div class="item-year">Universal Studios • 1993</div>
+                        <div class="price-info">
+                            <div class="current-price">$125.00</div>
+                            <div class="price-trend trend-up">
+                                ↗ +8% (30d)
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <span>12 sold</span>
+                            <span>Last: 3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card" onclick="viewItem('jurassic-park-trilogy-dvd')">
+                    <div class="item-image">💿</div>
+                    <div class="item-info">
+                        <div class="rarity-badge rarity-common">Common</div>
+                        <div class="item-title">Jurassic Park Trilogy DVD Box Set</div>
+                        <div class="item-year">Universal Studios • 2001</div>
+                        <div class="price-info">
+                            <div class="current-price">$19.95</div>
+                            <div class="price-trend trend-down">
+                                ↘ -2% (30d)
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <span>89 sold</span>
+                            <span>Last: 1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card" onclick="viewItem('lost-world-vhs')">
+                    <div class="item-image">📼</div>
+                    <div class="item-info">
+                        <div class="rarity-badge rarity-common">Common</div>
+                        <div class="item-title">The Lost World: Jurassic Park VHS</div>
+                        <div class="item-year">Universal Studios • 1997</div>
+                        <div class="price-info">
+                            <div class="current-price">$15.25</div>
+                            <div class="price-trend trend-up">
+                                ↗ +3% (30d)
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <span>156 sold</span>
+                            <span>Last: 1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-card" onclick="viewItem('jurassic-park-3-dvd')">
+                    <div class="item-image">💿</div>
+                    <div class="item-info">
+                        <div class="rarity-badge rarity-common">Common</div>
+                        <div class="item-title">Jurassic Park III DVD</div>
+                        <div class="item-year">Universal Studios • 2001</div>
+                        <div class="price-info">
+                            <div class="current-price">$8.99</div>
+                            <div class="price-trend trend-down">
+                                ↘ -1% (30d)
+                            </div>
+                        </div>
+                        <div class="item-stats">
+                            <span>203 sold</span>
+                            <span>Last: 6 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="page-btn">‹ Previous</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">Next ›</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function viewItem(itemId) {
+            alert(`Would navigate to detailed view for: ${itemId}`);
+            // In real app: window.location.href = `/item/${itemId}`;
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Simulate filtering
+                console.log(`Filtering by: ${this.textContent}`);
+            });
+        });
+
+        // Sort functionality
+        document.querySelector('.sort-dropdown').addEventListener('change', function() {
+            console.log(`Sorting by: ${this.value}`);
+            // Here you'd re-sort the results
+        });
+
+        // Pagination
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!this.textContent.includes('Previous') && !this.textContent.includes('Next')) {
+                    document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Search functionality
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const query = document.querySelector('.search-bar').value;
+            alert(`Searching for: ${query}`);
+        });
+    </script>
+</body>
+</html>

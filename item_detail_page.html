@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurassic Park VHS (1993) - RetroPrice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #4ecdc4;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+        }
+
+        .item-header {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .item-image-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .item-image {
+            width: 100%;
+            max-width: 300px;
+            height: 400px;
+            background: linear-gradient(45deg, #2a2a3e, #3a3a5e);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            margin: 0 auto 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .watchlist-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .watchlist-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .item-details {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .rarity-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            background: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .item-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffffff, #4ecdc4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .item-subtitle {
+            font-size: 1.2rem;
+            color: #4ecdc4;
+            margin-bottom: 25px;
+        }
+
+        .current-price {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .price-trend {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        .trend-up {
+            color: #ff6b6b;
+        }
+
+        .item-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .spec-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .spec-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .spec-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        /* Price History Chart */
+        .price-history {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #4ecdc4;
+        }
+
+        .chart-container {
+            height: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 200px;
+            background: linear-gradient(45deg, transparent, rgba(78, 205, 196, 0.1));
+            border-top: 3px solid #4ecdc4;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .chart-points {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 200px;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+        }
+
+        .chart-point {
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .chart-point:hover {
+            transform: scale(1.5);
+            background: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Recent Sales */
+        .recent-sales {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .sales-table th,
+        .sales-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sales-table th {
+            color: #4ecdc4;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .sales-table td {
+            font-size: 0.95rem;
+        }
+
+        .condition-tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .condition-mint {
+            background: rgba(76, 205, 196, 0.3);
+            color: #4ecdc4;
+        }
+
+        .condition-very-good {
+            background: rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+
+        .condition-good {
+            background: rgba(255, 152, 0, 0.3);
+            color: #ff9800;
+        }
+
+        .price-cell {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        /* Similar Items */
+        .similar-items {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .similar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .similar-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .similar-card:hover {
+            transform: translateY(-5px);
+            border-color: #4ecdc4;
+        }
+
+        .similar-image {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(45deg, #2a2a3e, #3a3a5e);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .similar-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .similar-price {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .item-header {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .item-title {
+                font-size: 2rem;
+            }
+
+            .current-price {
+                font-size: 2.5rem;
+            }
+
+            .item-specs {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .similar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sales-table {
+                font-size: 0.8rem;
+            }
+
+            .sales-table th,
+            .sales-table td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">RetroPrice</div>
+            <div class="breadcrumb">
+                <a href="#">Home</a> › <a href="#">Search</a> › <span>Jurassic Park VHS</span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Item Header -->
+            <div class="item-header">
+                <div class="item-image-section">
+                    <div class="item-image">📼</div>
+                    <button class="watchlist-btn" onclick="addToWatchlist()">
+                        ⭐ Add to Watchlist
+                    </button>
+                    <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">
+                        Get alerts when price drops below your target
+                    </div>
+                </div>
+
+                <div class="item-details">
+                    <div class="rarity-badge">Uncommon</div>
+                    <h1 class="item-title">Jurassic Park VHS</h1>
+                    <div class="item-subtitle">Universal Studios • 1993 • NTSC</div>
+                    
+                    <div class="current-price">$28.50</div>
+                    <div class="price-trend trend-up">
+                        ↗ +12% (30 days) • ↗ +24% (90 days)
+                    </div>
+
+                    <div class="item-specs">
+                        <div class="spec-item">
+                            <div class="spec-label">Avg. Price</div>
+                            <div class="spec-value">$26.75</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Total Sold</div>
+                            <div class="spec-value">127</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Last Sale</div>
+                            <div class="spec-value">2 days ago</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Price Range</div>
+                            <div class="spec-value">$18-$45</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price History Chart -->
+            <div class="price-history">
+                <h2 class="section-title">Price History (Last 6 Months)</h2>
+                <div class="chart-container">
+                    <div class="chart-line"></div>
+                    <div class="chart-points">
+                        <div class="chart-point" style="bottom: 40px;" title="Jan: $22.50"></div>
+                        <div class="chart-point" style="bottom: 45px;" title="Feb: $24.00"></div>
+                        <div class="chart-point" style="bottom: 35px;" title="Mar: $21.75"></div>
+                        <div class="chart-point" style="bottom: 50px;" title="Apr: $25.50"></div>
+                        <div class="chart-point" style="bottom: 55px;" title="May: $27.25"></div>
+                        <div class="chart-point" style="bottom: 65px;" title="Jun: $28.50"></div>
+                    </div>
+                </div>
+                <div class="chart-labels">
+                    <span>Jan</span>
+                    <span>Feb</span>
+                    <span>Mar</span>
+                    <span>Apr</span>
+                    <span>May</span>
+                    <span>Jun</span>
+                </div>
+            </div>
+
+            <!-- Recent Sales -->
+            <div class="recent-sales">
+                <h2 class="section-title">Recent Sales</h2>
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Price</th>
+                            <th>Condition</th>
+                            <th>Platform</th>
+                            <th>Shipping</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jun 29, 2025</td>
+                            <td class="price-cell">$28.50</td>
+                            <td><span class="condition-tag condition-very-good">Very Good</span></td>
+                            <td>eBay</td>
+                            <td>$4.99</td>
+                        </tr>
+                        <tr>
+                            <td>Jun 27, 2025</td>
+                            <td class="price-cell">$32.00</td>
+                            <td><span class="condition-tag condition-mint">Near Mint</span></td>
+                            <td>eBay</td>
+                            <td>Free</td>
+                        </tr>
+                        <tr>
+                            <td>Jun 25, 2025</td>
+                            <td class="price-cell">$24.99</td>
+                            <td><span class="condition-tag condition-good">Good</span></td>
+                            <td>Heritage</td>
+                            <td>$6.50</td>
+                        </tr>
+                        <tr>
+                            <td>Jun 23, 2025</td>
+                            <td class="price-cell">$29.95</td>
+                            <td><span class="condition-tag condition-very-good">Very Good</span></td>
+                            <td>eBay</td>
+                            <td>$3.99</td>
+                        </tr>
+                        <tr>
+                            <td>Jun 20, 2025</td>
+                            <td class="price-cell">$26.75</td>
+                            <td><span class="condition-tag condition-very-good">Very Good</span></td>
+                            <td>eBay</td>
+                            <td>$5.50</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Similar Items -->
+            <div class="similar-items">
+                <h2 class="section-title">Similar Items You Might Like</h2>
+                <div class="similar-grid">
+                    <div class="similar-card" onclick="viewSimilarItem('lost-world-vhs')">
+                        <div class="similar-image">📼</div>
+                        <div class="similar-title">The Lost World: Jurassic Park VHS</div>
+                        <div class="similar-price">$15.25</div>
+                    </div>
+                    <div class="similar-card" onclick="viewSimilarItem('jurassic-park-dvd')">
+                        <div class="similar-image">💿</div>
+                        <div class="similar-title">Jurassic Park DVD</div>
+                        <div class="similar-price">$12.99</div>
+                    </div>
+                    <div class="similar-card" onclick="viewSimilarItem('jurassic-park-sealed')">
+                        <div class="similar-image">📼</div>
+                        <div class="similar-title">Jurassic Park VHS Sealed</div>
+                        <div class="similar-price">$125.00</div>
+                    </div>
+                    <div class="similar-card" onclick="viewSimilarItem('jp3-vhs')">
+                        <div class="similar-image">📼</div>
+                        <div class="similar-title">Jurassic Park III VHS</div>
+                        <div class="similar-price">$18.50</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function addToWatchlist() {
+            alert('Added to your watchlist! You\'ll get notifications when the price changes.');
+        }
+
+        function viewSimilarItem(itemId) {
+            alert(`Would navigate to: ${itemId}`);
+        }
+
+        // Interactive chart points
+        document.querySelectorAll('.chart-point').forEach(point => {
+            point.addEventListener('mouseenter', function() {
+                const tooltip = document.createElement('div');
+                tooltip.style.position = 'absolute';
+                tooltip.style.background = 'rgba(0, 0, 0, 0.8)';
+                tooltip.style.color = 'white';
+                tooltip.style.padding = '8px 12px';
+                tooltip.style.borderRadius = '8px';
+                tooltip.style.fontSize = '0.8rem';
+                tooltip.style.bottom = '20px';
+                tooltip.style.left = '50%';
+                tooltip.style.transform = 'translateX(-50%)';
+                tooltip.style.whiteSpace = 'nowrap';
+                tooltip.style.zIndex = '1000';
+                tooltip.textContent = this.title;
+                this.appendChild(tooltip);
+            });
+
+            point.addEventListener('mouseleave', function() {
+                const tooltip = this.querySelector('div');
+                if (tooltip) {
+                    tooltip.remove();
+                }
+            });
+        });
+
+        // Simulate price updates
+        setInterval(() => {
+            const currentPriceEl = document.querySelector('.current-price');
+            const currentPrice = parseFloat(currentPriceEl.textContent.replace('$', ''));
+            const newPrice = currentPrice + (Math.random() - 0.5) * 2;
+            currentPriceEl.textContent = `$${newPrice.toFixed(2)}`;
+        }, 30000); // Update every 30 seconds for demo
+    </script>
+</body>
+</html>
