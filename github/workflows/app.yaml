@@ -1,0 +1,109 @@
+# .do/app.yaml
+# DigitalOcean App Platform Configuration for Film Price Guide
+
+name: film-price-guide
+region: nyc
+
+services:
+  # Main Flask Application
+  - name: web
+    source_dir: /backend
+    github:
+      repo: your-username/film-price-guide
+      branch: main
+      deploy_on_push: true
+    
+    run_command: gunicorn --worker-tmp-dir /dev/shm --config gunicorn.conf.py wsgi:app
+    
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: basic-xxs  # $5/month
+    
+    health_check:
+      http_path: /health
+    
+    http_port: 8080
+    
+    env:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONPATH
+        value: /app/backend
+      - key: PORT
+        value: "8080"
+    
+    # Environment variables from App Platform dashboard
+    envs:
+      - key: EBAY_APP_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: EBAY_CERT_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: EBAY_DEV_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: EBAY_VERIFICATION_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      - key: SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: OMDB_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: TMDB_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+
+databases:
+  # Managed MySQL Database
+  - name: film-price-db
+    engine: MYSQL
+    version: "8"
+    size: basic  # $15/month for managed database
+    num_nodes: 1
+    
+    # Database will auto-populate DATABASE_URL env var
+
+# Static Frontend Files (Optional - can serve from Flask)
+static_sites:
+  - name: frontend
+    source_dir: /frontend
+    github:
+      repo: your-username/film-price-guide
+      branch: main
+    build_command: echo "Static files ready"
+    output_dir: /
+    index_document: index.html
+    error_document: index.html
+    catchall_document: index.html
+    
+    # Custom domain setup (optional)
+    # domain: filmprices.yourdomain.com
+
+# Background Jobs (Optional)
+jobs:
+  - name: price-updater
+    source_dir: /backend
+    github:
+      repo: your-username/film-price-guide
+      branch: main
+    
+    run_command: python services/scheduler.py
+    environment_slug: python
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    
+    schedule: "0 */6 * * *"  # Every 6 hours
+    
+    envs:
+      - key: EBAY_APP_ID
+        scope: RUN_TIME
+        type: SECRET
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET

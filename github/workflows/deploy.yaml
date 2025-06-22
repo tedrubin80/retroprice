@@ -1,0 +1,177 @@
+# .github/workflows/deploy.yml
+name: 🎬 Film Price Guide - DigitalOcean Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # 🧪 Run Tests
+  test:
+    name: 🧪 Test Application
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: test_film_price_guide
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 📦 Install Dependencies
+      run: |
+        cd backend
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov flake8
+    
+    - name: 🔍 Lint Code
+      run: |
+        cd backend
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    
+    - name: 🗄️ Setup Test Database
+      run: |
+        mysql -h 127.0.0.1 -P 3306 -u root -ptest_password test_film_price_guide < database/schema.sql
+    
+    - name: 🚀 Run Tests
+      env:
+        DATABASE_URL: mysql://root:test_password@127.0.0.1:3306/test_film_price_guide
+        EBAY_APP_ID: ${{ secrets.EBAY_APP_ID_TEST }}
+        EBAY_CERT_ID: ${{ secrets.EBAY_CERT_ID_TEST }}
+        EBAY_DEV_ID: ${{ secrets.EBAY_DEV_ID_TEST }}
+        SECRET_KEY: test-secret-key-for-github-actions
+        FLASK_ENV: testing
+      run: |
+        cd backend
+        python -m pytest tests/ -v --cov=. --cov-report=xml
+    
+    - name: 📊 Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        fail_ci_if_error: false
+
+  # 🔒 Security Checks
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🕵️ Scan for Secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+    
+    - name: 🛡️ Python Security Check
+      run: |
+        pip install safety bandit
+        cd backend
+        safety check -r requirements.txt
+        bandit -r . -f json -o bandit-report.json || true
+
+  # 🌊 Deploy to DigitalOcean App Platform
+  deploy:
+    name: 🌊 Deploy to DigitalOcean
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    environment:
+      name: production
+      url: https://film-price-guide.ondigitalocean.app
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Install DigitalOcean CLI
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+    
+    - name: 🌊 Deploy to App Platform
+      run: |
+        # Create or update the app
+        if doctl apps list | grep -q "film-price-guide"; then
+          echo "🔄 Updating existing app..."
+          APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep film-price-guide | cut -f1)
+          doctl apps update $APP_ID --spec .do/app.yaml --wait
+        else
+          echo "🆕 Creating new app..."
+          doctl apps create --spec .do/app.yaml --wait
+        fi
+    
+    - name: 📱 Get App Info
+      run: |
+        APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep film-price-guide | cut -f1)
+        APP_URL=$(doctl apps get $APP_ID --format LiveURL --no-header)
+        echo "🌐 App deployed at: $APP_URL"
+        echo "APP_URL=$APP_URL" >> $GITHUB_ENV
+    
+    - name: 🗄️ Run Database Migrations
+      run: |
+        echo "🗄️ Database migrations would run here"
+        # Add database migration commands if needed
+        # doctl databases sql $DATABASE_ID --file database/migrations/latest.sql
+
+  # 🏥 Health Check
+  health-check:
+    name: 🏥 Health Check
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: ⏳ Wait for Deployment
+      run: sleep 60  # DigitalOcean needs more time to fully deploy
+    
+    - name: 🩺 Check Application Health
+      run: |
+        # Get the app URL
+        doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep film-price-guide | cut -f1)
+        APP_URL=$(doctl apps get $APP_ID --format LiveURL --no-header)
+        
+        echo "🔍 Checking health at: $APP_URL/health"
+        
+        # Check health endpoint
+        response=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/health")
+        if [ $response -eq 200 ]; then
+          echo "✅ Application is healthy!"
+        else
+          echo "❌ Health check failed with status: $response"
+          exit 1
+        fi
+    
+    - name: 🔍 Test eBay API Integrat

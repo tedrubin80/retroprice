@@ -1,0 +1,206 @@
+# .github/workflows/deploy.yml
+name: 🎬 Film Price Guide CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  # 🧪 Run Tests
+  test:
+    name: 🧪 Test Application
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: test_film_price_guide
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 📦 Install Dependencies
+      run: |
+        cd backend
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov flake8
+    
+    - name: 🔍 Lint Code
+      run: |
+        cd backend
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    
+    - name: 🗄️ Setup Test Database
+      run: |
+        mysql -h 127.0.0.1 -P 3306 -u root -ptest_password test_film_price_guide < database/schema.sql
+    
+    - name: 🚀 Run Tests
+      env:
+        DATABASE_URL: mysql://root:test_password@127.0.0.1:3306/test_film_price_guide
+        EBAY_APP_ID: ${{ secrets.EBAY_APP_ID_TEST }}
+        EBAY_CERT_ID: ${{ secrets.EBAY_CERT_ID_TEST }}
+        EBAY_DEV_ID: ${{ secrets.EBAY_DEV_ID_TEST }}
+        SECRET_KEY: test-secret-key-for-github-actions
+        FLASK_ENV: testing
+      run: |
+        cd backend
+        python -m pytest tests/ -v --cov=. --cov-report=xml
+    
+    - name: 📊 Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        fail_ci_if_error: false
+
+  # 🔒 Security Checks
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🕵️ Scan for Secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+    
+    - name: 🛡️ Python Security Check
+      run: |
+        pip install safety bandit
+        cd backend
+        safety check -r requirements.txt
+        bandit -r . -f json -o bandit-report.json || true
+    
+    - name: 📋 Upload Security Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-report
+        path: backend/bandit-report.json
+
+  # 🚀 Deploy to Production
+  deploy:
+    name: 🚀 Deploy to Production
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    environment:
+      name: production
+      url: https://your-app-name.railway.app
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+    
+    # Railway Deployment (Recommended)
+    - name: 🚂 Deploy to Railway
+      uses: bervProject/railway-deploy@v1.0.6
+      with:
+        railway_token: ${{ secrets.RAILWAY_TOKEN }}
+        service: ${{ secrets.RAILWAY_SERVICE_ID }}
+    
+    # Alternative: Render Deployment
+    # - name: 🎨 Deploy to Render
+    #   env:
+    #     RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+    #     RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+    #   run: |
+    #     curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+    #          -H "Authorization: Bearer $RENDER_API_KEY" \
+    #          -H "Content-Type: application/json" \
+    #          -d '{"clearCache": false}'
+    
+    # Alternative: Heroku Deployment  
+    # - name: 🟣 Deploy to Heroku
+    #   uses: akhileshns/heroku-deploy@v3.12.14
+    #   with:
+    #     heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+    #     heroku_app_name: "film-price-guide"
+    #     heroku_email: "your-email@example.com"
+    
+    - name: 🎉 Deployment Success
+      run: |
+        echo "🎬 Film Price Guide deployed successfully!"
+        echo "🌐 Production URL: https://your-app-name.railway.app"
+
+  # 🏥 Health Check
+  health-check:
+    name: 🏥 Health Check
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: ⏳ Wait for Deployment
+      run: sleep 30
+    
+    - name: 🩺 Check Application Health
+      run: |
+        response=$(curl -s -o /dev/null -w "%{http_code}" https://your-app-name.railway.app/health)
+        if [ $response -eq 200 ]; then
+          echo "✅ Application is healthy!"
+        else
+          echo "❌ Health check failed with status: $response"
+          exit 1
+        fi
+    
+    - name: 🔍 Test eBay API Integration
+      env:
+        APP_URL: https://your-app-name.railway.app
+      run: |
+        response=$(curl -s "$APP_URL/api/ebay/health")
+        echo "eBay API Health: $response"
+
+  # 📧 Notifications
+  notify:
+    name: 📧 Notify Team
+    needs: [deploy, health-check]
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📨 Send Success Notification
+      if: needs.deploy.result == 'success' && needs.health-check.result == 'success'
+      run: |
+        echo "🎉 Deployment successful!"
+        # Add Slack/Discord webhook here if needed
+        # curl -X POST -H 'Content-type: application/json' \
+        #   --data '{"text":"🎬 Film Price Guide deployed successfully!"}' \
+        #   ${{ secrets.SLACK_WEBHOOK_URL }}
+    
+    - name: 🚨 Send Failure Notification
+      if: needs.deploy.result == 'failure' || needs.health-check.result == 'failure'
+      run: |
+        echo "❌ Deployment failed!"
+        # Add failure notification here
