@@ -1,0 +1,36 @@
+# FILE LOCATION: /flask_backend/.htaccess
+# SAVE AS: .htaccess (in the flask_backend/ directory)
+
+# Flask Backend Configuration for Dreamhost
+
+# Enable Passenger for Python
+PassengerEnabled On
+PassengerAppRoot /home/yourusername/yourdomain.com/flask_backend
+PassengerBaseURI /flask
+PassengerPython /home/yourusername/.local/share/virtualenvs/yourdomain.com/bin/python
+
+# Set application environment
+PassengerAppEnv production
+PassengerFriendlyErrorPages off
+
+# Handle API routes
+RewriteEngine On
+
+# Route all requests to passenger_wsgi.py
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ passenger_wsgi.py/$1 [QSA,L]
+
+# Security headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# CORS headers for API
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+# Handle preflight OPTIONS requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]

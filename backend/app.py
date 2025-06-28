@@ -1,250 +1,222 @@
-# backend/app.py
+#!/usr/bin/env python3
 """
 Film Price Guide - Main Flask Application
-Entry point for the backend API server
+Multi-API search engine for VHS, DVD, and Graded Movies
 """
 
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 import os
-from datetime import datetime
 import logging
-
-# Import configuration
-from config.config import Config
-
-# Import blueprints
-from endpoints.ebay_api import ebay_bp
-from endpoints.ebay_deletion import deletion_bp
-# from endpoints.omdb_api import omdb_bp  # Add when created
-# from endpoints.tmdb_api import tmdb_bp  # Add when created
-# from endpoints.admin_api import admin_bp  # Add when created
-# from endpoints.user_api import user_bp  # Add when created
+from datetime import datetime
+from flask import Flask, jsonify, request, send_from_directory, render_template_string
+from flask_cors import CORS
+from werkzeug.exceptions import NotFound
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, 
+           static_folder='../frontend',
+           static_url_path='/static')
 
-# Load configuration
-app.config.from_object(Config)
+# Basic configuration
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-me')
+app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL', 'mysql://root:password@localhost/film_price_guide')
+app.config['EBAY_APP_ID'] = os.environ.get('EBAY_APP_ID')
+app.config['EBAY_CERT_ID'] = os.environ.get('EBAY_CERT_ID')
+app.config['EBAY_DEV_ID'] = os.environ.get('EBAY_DEV_ID')
 
-# Initialize extensions
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-CORS(app, origins=['http://localhost:3000', 'https://yourdomain.com'])
+# Initialize CORS
+CORS(app, origins=[
+    'http://localhost:3000',
+    'http://localhost:5000', 
+    'https://yourdomain.com',
+    'https://*.dreamhost.com',
+    'https://*.github.io'
+])
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/film_price_guide.log'),
-        logging.StreamHandler()
-    ]
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Register blueprints
-app.register_blueprint(ebay_bp)
-app.register_blueprint(deletion_bp)
-# app.register_blueprint(omdb_bp)  # Uncomment when created
-# app.register_blueprint(tmdb_bp)  # Uncomment when created
-# app.register_blueprint(admin_bp)  # Uncomment when created
-# app.register_blueprint(user_bp)  # Uncomment when created
+# Try to import and register blueprints (graceful degradation)
+try:
+    from endpoints.ebay_api import ebay_bp
+    app.register_blueprint(ebay_bp)
+    logger.info("✅ Registered eBay API blueprint")
+except ImportError:
+    logger.warning("⚠️ eBay API blueprint not found")
 
-# Import models (after db initialization)
-from models.user import User
-from models.film import Film
-from models.price_history import PriceHistory
-from models.watchlist import Watchlist
+try:
+    from endpoints.ebay_deletion import deletion_bp
+    app.register_blueprint(deletion_bp)
+    logger.info("✅ Registered eBay deletion compliance blueprint")
+except ImportError:
+    logger.warning("⚠️ eBay deletion blueprint not found")
+
+try:
+    from endpoints.admin_api import admin_bp
+    app.register_blueprint(admin_bp)
+    logger.info("✅ Registered Admin API blueprint")
+except ImportError:
+    logger.warning("⚠️ Admin API blueprint not found")
+
+try:
+    from endpoints.auth_api import auth_bp
+    app.register_blueprint(auth_bp)
+    logger.info("✅ Registered Authentication blueprint")
+except ImportError:
+    logger.warning("⚠️ Authentication blueprint not found")
+
+# ================================
+# FRONTEND ROUTES
+# ================================
 
 @app.route('/')
 def index():
-    """
-    Root endpoint - API status
-    """
+    """Serve the homepage"""
+    try:
+        return send_from_directory('../frontend', 'index.html')
+    except NotFound:
+        return render_template_string("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Film Price Guide</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                .status { padding: 10px; border-radius: 5px; margin: 10px 0; }
+                .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+                .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+            </style>
+        </head>
+        <body>
+            <h1>🎬 Film Price Guide API</h1>
+            <p>Multi-API search engine for VHS, DVD, and Graded Movies</p>
+            
+            <div class="warning">
+                <strong>Setup Required:</strong> Frontend files not found. Place HTML files in ../frontend/ directory
+            </div>
+            
+            <div class="success">✅ Flask application running successfully</div>
+            
+            <h2>🔗 Available Endpoints</h2>
+            <ul>
+                <li><a href="/api/health">/api/health</a> - Health check</li>
+                <li><a href="/api/status">/api/status</a> - System status</li>
+                <li>/api/ebay/* - eBay API endpoints</li>
+                <li>/api/admin/* - Admin panel endpoints</li>
+                <li>/api/auth/* - Authentication endpoints</li>
+            </ul>
+            
+            <h2>📋 Next Steps</h2>
+            <ol>
+                <li>Move your HTML files to frontend/ directory</li>
+                <li>Create .env file with API keys</li>
+                <li>Set up MySQL database</li>
+                <li>Configure admin panel</li>
+            </ol>
+        </body>
+        </html>
+        """)
+
+@app.route('/admin')
+def admin_panel():
+    """Serve the admin configuration panel"""
+    try:
+        return send_from_directory('../frontend', 'admin-config.html')
+    except NotFound:
+        return jsonify({"error": "Admin panel not found"}), 404
+
+@app.route('/dashboard')
+def dashboard():
+    """Serve the user dashboard"""
+    try:
+        return send_from_directory('../frontend', 'dashboard.html')
+    except NotFound:
+        return jsonify({"error": "Dashboard not found"}), 404
+
+@app.route('/search')
+def search_page():
+    """Serve the search results page"""
+    try:
+        return send_from_directory('../frontend', 'search-results.html')
+    except NotFound:
+        return jsonify({"error": "Search page not found"}), 404
+
+# ================================
+# API ROUTES
+# ================================
+
+@app.route('/api/health')
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Film Price Guide',
+        'version': '1.0.0',
+        'timestamp': datetime.utcnow().isoformat()
+    })
+
+@app.route('/api/status')
+def system_status():
+    """System status endpoint"""
     return jsonify({
         'service': 'Film Price Guide API',
+        'status': 'running',
+        'blueprints': list(app.blueprints.keys()),
+        'environment': {
+            'EBAY_APP_ID': 'configured' if app.config.get('EBAY_APP_ID') else 'missing',
+            'DATABASE_URL': 'configured' if app.config.get('DATABASE_URL') else 'missing'
+        },
+        'timestamp': datetime.utcnow().isoformat()
+    })
+
+@app.route('/api/config')
+def get_config():
+    """Get public configuration"""
+    return jsonify({
+        'app_name': 'Film Price Guide',
         'version': '1.0.0',
-        'status': 'active',
-        'timestamp': datetime.utcnow().isoformat(),
-        'endpoints': {
-            'ebay_api': '/api/ebay/',
-            'deletion_notifications': '/api/ebay/deletion/',
-            'health_check': '/health'
+        'apis_available': {
+            'ebay': bool(app.config.get('EBAY_APP_ID')),
+            'omdb': bool(app.config.get('OMDB_API_KEY')),
+            'tmdb': bool(app.config.get('TMDB_API_KEY'))
         }
     })
 
-@app.route('/health')
-def health_check():
-    """
-    Health check endpoint for monitoring
-    """
-    try:
-        # Test database connection
-        db.session.execute('SELECT 1')
-        db_status = 'healthy'
-    except Exception as e:
-        logger.error(f"Database health check failed: {str(e)}")
-        db_status = 'unhealthy'
-    
-    health_data = {
-        'service': 'Film Price Guide',
-        'status': 'healthy' if db_status == 'healthy' else 'degraded',
-        'timestamp': datetime.utcnow().isoformat(),
-        'checks': {
-            'database': db_status,
-            'api_keys_configured': {
-                'ebay': bool(app.config.get('EBAY_APP_ID')),
-                'omdb': bool(app.config.get('OMDB_API_KEY')),
-                'tmdb': bool(app.config.get('TMDB_API_KEY'))
-            }
-        }
-    }
-    
-    status_code = 200 if health_data['status'] == 'healthy' else 503
-    return jsonify(health_data), status_code
+# ================================
+# ERROR HANDLERS
+# ================================
 
-@app.route('/api/status')
-def api_status():
-    """
-    Detailed API status including database statistics
-    """
-    try:
-        # Get database statistics
-        film_count = Film.query.count()
-        price_count = PriceHistory.query.count()
-        user_count = User.query.count()
-        
-        return jsonify({
-            'api_version': '1.0.0',
-            'status': 'operational',
-            'database_stats': {
-                'total_films': film_count,
-                'total_price_records': price_count,
-                'total_users': user_count
-            },
-            'available_endpoints': [
-                'GET /api/ebay/search - Search sold movie items',
-                'GET /api/ebay/categories - Get movie categories',
-                'GET /api/ebay/price-history/<id> - Get price history',
-                'GET /api/ebay/trending - Get trending movies',
-                'POST /api/ebay/deletion/notifications - Handle deletions'
-            ],
-            'timestamp': datetime.utcnow().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"Error in API status: {str(e)}")
-        return jsonify({
-            'api_version': '1.0.0',
-            'status': 'error',
-            'error': str(e),
-            'timestamp': datetime.utcnow().isoformat()
-        }), 500
-
-# Global error handlers
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({
-        'error': 'Not Found',
-        'message': 'The requested endpoint does not exist',
-        'available_endpoints': [
-            'GET / - API information',
-            'GET /health - Health check',
-            'GET /api/status - Detailed status',
-            'GET /api/ebay/* - eBay API endpoints'
-        ]
-    }), 404
+    """Handle 404 errors"""
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'API endpoint not found'}), 404
+    return render_template_string("""
+    <h1>404 - Page Not Found</h1>
+    <p><a href="/">← Back to Home</a></p>
+    """), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    logger.error(f"Internal server error: {str(error)}")
-    db.session.rollback()
-    return jsonify({
-        'error': 'Internal Server Error',
-        'message': 'An unexpected error occurred'
-    }), 500
+    """Handle 500 errors"""
+    logger.error(f"Internal server error: {error}")
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Internal server error'}), 500
+    return render_template_string("""
+    <h1>500 - Server Error</h1>
+    <p><a href="/">← Back to Home</a></p>
+    """), 500
 
-@app.errorhandler(400)
-def bad_request(error):
-    return jsonify({
-        'error': 'Bad Request',
-        'message': 'Invalid request format or parameters'
-    }), 400
-
-# Request logging middleware
-@app.before_request
-def log_request_info():
-    """Log incoming requests for debugging"""
-    if request.endpoint not in ['health_check']:  # Skip health check logs
-        logger.info(f"{request.method} {request.url} - {request.remote_addr}")
-
-@app.after_request
-def log_response_info(response):
-    """Log response status for debugging"""
-    if request.endpoint not in ['health_check']:  # Skip health check logs
-        logger.info(f"Response: {response.status_code}")
-    return response
-
-# Database initialization
-@app.before_first_request
-def create_tables():
-    """Create database tables on first request"""
-    try:
-        db.create_all()
-        logger.info("Database tables created successfully")
-    except Exception as e:
-        logger.error(f"Error creating database tables: {str(e)}")
-
-# CLI commands for database management
-@app.cli.command('init-db')
-def init_db_command():
-    """Initialize the database with tables"""
-    try:
-        db.create_all()
-        print("Database initialized successfully!")
-    except Exception as e:
-        print(f"Error initializing database: {str(e)}")
-
-@app.cli.command('seed-db')
-def seed_db_command():
-    """Seed the database with sample data"""
-    try:
-        # Add sample films
-        sample_films = [
-            Film(title="Jurassic Park", format="VHS", year=1993),
-            Film(title="Jurassic Park", format="DVD", year=1993),
-            Film(title="Jurassic Park", format="Blu-ray", year=1993),
-            Film(title="The Matrix", format="DVD", year=1999),
-            Film(title="Star Wars", format="VHS", year=1977)
-        ]
-        
-        for film in sample_films:
-            existing = Film.query.filter_by(
-                title=film.title, 
-                format=film.format
-            ).first()
-            if not existing:
-                db.session.add(film)
-        
-        db.session.commit()
-        print("Database seeded with sample data!")
-        
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error seeding database: {str(e)}")
+# ================================
+# MAIN EXECUTION
+# ================================
 
 if __name__ == '__main__':
-    # Create logs directory if it doesn't exist
-    os.makedirs('logs', exist_ok=True)
-    
-    # Run the application
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     
-    logger.info(f"Starting Film Price Guide API on port {port}")
+    logger.info(f"🚀 Starting Film Price Guide on port {port}")
+    
     app.run(
         host='0.0.0.0',
         port=port,
