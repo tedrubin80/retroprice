@@ -1,0 +1,39 @@
+# FILE LOCATION: /config/.htaccess
+# SAVE AS: .htaccess (in the config/ directory)
+
+# DENY ALL ACCESS TO CONFIG FILES
+# This prevents anyone from directly accessing configuration files via web browser
+
+Order Deny,Allow
+Deny from all
+
+# Block access to specific file types
+<FilesMatch "\.(php|inc|conf|sql|key|env)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Additional security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+</IfModule>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Hide sensitive files
+<Files "secure_config.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+<Files "database.php">
+    Order Deny,Allow  
+    Deny from all
+</Files>
+
+<Files ".env">
+    Order Deny,Allow
+    Deny from all
+</Files>
